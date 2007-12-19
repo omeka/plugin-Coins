@@ -1,10 +1,16 @@
 <?php
 add_plugin_hook('append_to_item_show', 'COinS');
+add_plugin_hook('append_to_items_browse', 'COinSMultiple');
 
 function COinS($item)
 {
     $coins = new COinS($item);
     echo $coins->coinsSpan;
+}
+
+function COinSMultiple($items)
+{
+    foreach ($items as $item) COinS($item);
 }
 
 class COinS
