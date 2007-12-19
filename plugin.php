@@ -114,8 +114,7 @@ class COinS
     }
     private function setFormat()
     {
-        // @todo: include format when Omeka is updated to include it.
-        $this->coins['rft.format'] = ''; //$this->item->format;
+        $this->coins['rft.format'] = $this->item->format;
     }
     private function setIdentifier()
     {
