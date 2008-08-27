@@ -5,34 +5,48 @@ add_plugin_hook('append_to_items_browse', 'COinSMultiple');
 function COinS($item)
 {
     $coins = new COinS($item);
-    echo $coins->coinsSpan;
+    echo $coins->getCoinsSpan();
 }
 
 function COinSMultiple($items)
 {
-    foreach ($items as $item) COinS($item);
+    foreach ($items as $item) {
+        COinS($item);
+    }
 }
 
 class COinS
 {
-    private $item;
+    const COINS_SPAN_CLASS = 'Z3988';
     
-    private $coins = array();
+    const CTX_VER = 'Z39.88-2004';
     
-    const ctx_ver     = 'Z39.88-2004';
-    const rft_val_fmt = 'info:ofi/fmt:kev:mtx:dc';
-    const rfr_id      = 'info:sid/omeka.org:generator';
+    const RFT_VAL_FMT = 'info:ofi/fmt:kev:mtx:dc';
     
-    public $coinsSpan;
+    const RFR_ID = 'info:sid/omeka.org:generator';
+    
+    const ELEMENT_SET_DUBLIN_CORE = 'Dublin Core';
+    
+    const ELEMENT_TEXT_INDEX = 0;
+    
+    private $_item;
+    
+    private $_coins = array();
+    
+    private $_coinsSpan;
+    
+    public function getCoinsSpan()
+    {
+        return $this->_coinsSpan;
+    }
     
     public function __construct($item)
     {
-        $this->item = $item;
+        $this->_item = $item;
         
-        $this->coins['ctx_ver']     = self::ctx_ver;
-        $this->coins['rft_val_fmt'] = self::rft_val_fmt;
-        $this->coins['ctx_ver']     = self::ctx_ver;
-        $this->coins['rfr_id']      = self::rfr_id;
+        $this->_coins['ctx_ver']     = self::CTX_VER;
+        $this->_coins['rft_val_fmt'] = self::RFT_VAL_FMT;
+        $this->_coins['rfr_id']      = self::RFR_ID;
         
         $this->setTitle();
         $this->setCreator();
@@ -48,42 +62,60 @@ class COinS
         $this->setLanguage();
         $this->setCoverage();
         $this->setRights();
+        $this->setRelation();
         
         $this->buildCoinsSpan();
     }
     private function setTitle()
     {
-        $this->coins['rft.title'] = $this->item->title;
+        $this->_coins['rft.title'] = item('Title', 
+                                          array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setCreator()
     {
-        $this->coins['rft.creator'] = $this->item->creator;
+        $this->_coins['rft.creator'] = item('Creator', 
+                                            array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                  'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setSubject()
     {
-        $this->coins['rft.subject'] = $this->item->subject;
+        $this->_coins['rft.subject'] = item('Subject', 
+                                            array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                  'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setDescription()
     {
         // Truncate to avoid long descriptions.
-        $this->coins['rft.description'] = substr($this->item->description, 0, 500);
+        $this->_coins['rft.description'] = substr(item('Description', 
+                                                       array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                             'index'       => self::ELEMENT_TEXT_INDEX)), 0, 500);
     }
     private function setPublisher()
     {
-        $this->coins['rft.publisher'] = $this->item->publisher;
+        $this->_coins['rft.publisher'] = item('Publisher', 
+                                              array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                    'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setContributor()
     {
-        $this->coins['rft.contributor'] = $this->item->contributor;
+        $this->_coins['rft.contributor'] = item('Contributor', 
+                                                array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                      'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setDate()
     {
-        $this->coins['rft.date'] = $this->item->date;
+        $this->_coins['rft.date'] = item('Date', 
+                                         array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                               'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setType()
     {
-        // @todo: devise a better mapping scheme between omeka and COinS/Zotero
-        switch ($this->item->Type->name) {
+        /**
+         * Get the type from the Item Type name, not the Dublin Core type name.
+         * @todo: devise a better mapping scheme between Omeka and COinS/Zotero
+         */
+        switch ($this->_item->Type->name) {
             case 'Oral History':
                 $type = 'interview';
                 break;
@@ -110,93 +142,50 @@ class COinS
                 $type = 'document';
                 break;
         }
-        $this->coins['rft.type'] = $type;
+        $this->_coins['rft.type'] = $type;
     }
     private function setFormat()
     {
-        $this->coins['rft.format'] = $this->item->format;
+        $this->_coins['rft.format'] = item('Format', 
+                                           array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                 'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setIdentifier()
     {
-        $this->coins['rft.identifier'] = $_SERVER['SCRIPT_URI'];
+        $this->_coins['rft.identifier'] = $_SERVER['SCRIPT_URI'];
     }
     private function setSource()
     {
-        $this->coins['rft.source'] = $this->item->source;
+        $this->_coins['rft.source'] = item('Source', 
+                                           array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                 'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setLanguage()
     {
-        $this->coins['rft.language'] = $this->item->language;
+        $this->_coins['rft.language'] = item('Language', 
+                                             array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                   'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setCoverage()
     {
-        // @todo: somehow include spacial coverage?
-        $this->coins['rft.coverage'] = $this->item->temporal_coverage_start . '–' . $this->item->temporal_coverage_end;
+        $this->_coins['rft.coverage'] = item('Coverage', 
+                                              array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                    'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function setRights()
     {
-        $this->coins['rft.rights'] = $this->item->rights;
+        $this->_coins['rft.rights'] = item('Rights', 
+                                           array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                 'index'       => self::ELEMENT_TEXT_INDEX));
+    }
+    private function setRelation()
+    {
+        $this->_coins['rft.relation'] = item('Relation', 
+                                             array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
+                                                   'index'       => self::ELEMENT_TEXT_INDEX));
     }
     private function buildCoinsSpan()
     {
-        $this->coinsSpan = '<span class="Z3988" title="' . http_build_query($this->coins, '', '&amp;') . '"></span>';
+        $this->_coinsSpan = '<span class="' . self::COINS_SPAN_CLASS . '" title="' . http_build_query($this->_coins, '', '&amp;') . '"></span>';
     }
 }
-
-/*
-// Zotero item types as of 2007-11-01
-note
-book
-bookSection
-journalArticle
-magazineArticle
-newspaperArticle
-thesis
-letter
-manuscript
-interview
-film
-artwork
-webpage
-attachment
-report
-bill
-case
-hearing
-patent
-statute
-email
-map
-blogPost
-instantMessage
-forumPost
-audioRecording
-presentation
-videoRecording
-tvBroadcast
-radioBroadcast
-podcast
-computerProgram
-conferencePaper
-document
-encyclopediaArticle
-dictionaryEntry
-*/
-
-/*
-// Omeka item types (bundled) as of 2007-11-01
-Oral History
-Moving Image
-Sound
-Email
-Website
-Hyperlink
-Document
-Event
-Lesson Plan
-Person
-Interactive Resource
-Still Image
-*/
-
-?>
