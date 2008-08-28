@@ -48,73 +48,59 @@ class COinS
         $this->_coins['rft_val_fmt'] = self::RFT_VAL_FMT;
         $this->_coins['rfr_id']      = self::RFR_ID;
         
-        $this->setTitle();
-        $this->setCreator();
-        $this->setSubject();
-        $this->setDescription();
-        $this->setPublisher();
-        $this->setContributor();
-        $this->setDate();
-        $this->setType();
-        $this->setFormat();
-        $this->setIdentifier();
-        $this->setSource();
-        $this->setLanguage();
-        $this->setCoverage();
-        $this->setRights();
-        $this->setRelation();
+        $this->_setTitle();
+        $this->_setCreator();
+        $this->_setSubject();
+        $this->_setDescription();
+        $this->_setPublisher();
+        $this->_setContributor();
+        $this->_setDate();
+        $this->_setType();
+        $this->_setFormat();
+        $this->_setIdentifier();
+        $this->_setSource();
+        $this->_setLanguage();
+        $this->_setCoverage();
+        $this->_setRights();
+        $this->_setRelation();
         
-        $this->buildCoinsSpan();
+        $this->_buildCoinsSpan();
     }
-    private function setTitle()
+    private function _setTitle()
     {
-        $this->_coins['rft.title'] = item('Title', 
-                                          array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.title'] = $this->_getElementText('Title');
     }
-    private function setCreator()
+    private function _setCreator()
     {
-        $this->_coins['rft.creator'] = item('Creator', 
-                                            array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                  'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.creator'] = $this->_getElementText('Creator');
     }
-    private function setSubject()
+    private function _setSubject()
     {
-        $this->_coins['rft.subject'] = item('Subject', 
-                                            array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                  'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.subject'] = $this->_getElementText('Subject');
     }
-    private function setDescription()
+    private function _setDescription()
     {
-        // Truncate to avoid long descriptions.
-        $this->_coins['rft.description'] = substr(item('Description', 
-                                                       array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                             'index'       => self::ELEMENT_TEXT_INDEX)), 0, 500);
+        // Truncate long descriptions.
+        $this->_coins['rft.description'] = substr($this->_getElementText('Description'), 0, 500);
     }
-    private function setPublisher()
+    private function _setPublisher()
     {
-        $this->_coins['rft.publisher'] = item('Publisher', 
-                                              array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                    'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.publisher'] = $this->_getElementText('Publisher');
     }
-    private function setContributor()
+    private function _setContributor()
     {
-        $this->_coins['rft.contributor'] = item('Contributor', 
-                                                array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                      'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.contributor'] = $this->_getElementText('Contributor');
     }
-    private function setDate()
+    private function _setDate()
     {
-        $this->_coins['rft.date'] = item('Date', 
-                                         array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                               'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.date'] = $this->_getElementText('Date');
     }
-    private function setType()
+    /**
+     * Use the type from the Item Type name, not the Dublin Core type name.
+     * @todo: devise a better mapping scheme between Omeka and COinS/Zotero
+     */
+    private function _setType()
     {
-        /**
-         * Get the type from the Item Type name, not the Dublin Core type name.
-         * @todo: devise a better mapping scheme between Omeka and COinS/Zotero
-         */
         switch ($this->_item->Type->name) {
             case 'Oral History':
                 $type = 'interview';
@@ -144,47 +130,50 @@ class COinS
         }
         $this->_coins['rft.type'] = $type;
     }
-    private function setFormat()
+    private function _setFormat()
     {
-        $this->_coins['rft.format'] = item('Format', 
-                                           array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                 'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.format'] = $this->_getElementText('Format');
     }
-    private function setIdentifier()
+    /**
+     * Use the current script URI instead of the Dublin Core identifier.
+     * @todo when running on localhost, $_SERVER['SCRIPT_URI'] does not return 
+     * the full URI (http://localhost/...). current_uri(), url_for(), etc. 
+     * don't return the full path either. Need to find some way to always get 
+     * the full path of the current URL regardless of host.
+     */
+    private function _setIdentifier()
     {
         $this->_coins['rft.identifier'] = $_SERVER['SCRIPT_URI'];
     }
-    private function setSource()
+    private function _setSource()
     {
-        $this->_coins['rft.source'] = item('Source', 
-                                           array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                 'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.source'] = $this->_getElementText('Source');
     }
-    private function setLanguage()
+    private function _setLanguage()
     {
-        $this->_coins['rft.language'] = item('Language', 
-                                             array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                   'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.language'] = $this->_getElementText('Language');
     }
-    private function setCoverage()
+    private function _setCoverage()
     {
-        $this->_coins['rft.coverage'] = item('Coverage', 
-                                              array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                    'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.coverage'] = $this->_getElementText('Coverage');
     }
-    private function setRights()
+    private function _setRights()
     {
-        $this->_coins['rft.rights'] = item('Rights', 
-                                           array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                 'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.rights'] = $this->_getElementText('Rights');
     }
-    private function setRelation()
+    private function _setRelation()
     {
-        $this->_coins['rft.relation'] = item('Relation', 
-                                             array('element_set' => self::ELEMENT_SET_DUBLIN_CORE, 
-                                                   'index'       => self::ELEMENT_TEXT_INDEX));
+        $this->_coins['rft.relation'] = $this->_getElementText('Relation');
     }
-    private function buildCoinsSpan()
+    
+    private function _getElementText($elementName)
+    {
+        $elementTexts = item($elementName, 
+                             array('element_set' => self::ELEMENT_SET_DUBLIN_CORE));
+        return $elementTexts[count($elementTexts) - 1];
+    }
+    
+    private function _buildCoinsSpan()
     {
         $this->_coinsSpan = '<span class="' . self::COINS_SPAN_CLASS . '" title="' . http_build_query($this->_coins, '', '&amp;') . '"></span>';
     }
