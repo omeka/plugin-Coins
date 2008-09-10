@@ -136,14 +136,18 @@ class COinS
     }
     /**
      * Use the current script URI instead of the Dublin Core identifier.
-     * @todo when running on localhost, $_SERVER['SCRIPT_URI'] does not return 
-     * the full URI (http://localhost/...). current_uri(), url_for(), etc. 
-     * don't return the full path either. Need to find some way to always get 
-     * the full path of the current URL regardless of host.
      */
     private function _setIdentifier()
     {
-        $this->_coins['rft.identifier'] = $_SERVER['SCRIPT_URI'];
+        // Set the identifier as the absolute URL of the current page.
+        // @todo Put this, or something like this, in a abs_url_for() helper 
+        // function.
+        $serverProtocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 
+                                            0, 
+                                            strpos($_SERVER['SERVER_PROTOCOL'], '/')));
+        $serverName = $_SERVER['SERVER_NAME'];
+        $identifier = "$serverProtocol://$serverName" . url_for();
+        $this->_coins['rft.identifier'] = $identifier;
     }
     private function _setSource()
     {
