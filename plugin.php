@@ -146,7 +146,7 @@ class COinS
                                             0, 
                                             strpos($_SERVER['SERVER_PROTOCOL'], '/')));
         $serverName = $_SERVER['SERVER_NAME'];
-        $identifier = "$serverProtocol://$serverName" . url_for();
+        $identifier = "$serverProtocol://$serverName" . uri();
         $this->_coins['rft.identifier'] = $identifier;
     }
     private function _setSource()
