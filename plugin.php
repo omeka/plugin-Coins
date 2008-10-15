@@ -2,16 +2,17 @@
 add_plugin_hook('append_to_item_show', 'COinS');
 add_plugin_hook('append_to_items_browse', 'COinSMultiple');
 
-function COinS($item)
+function COinS()
 {
+    $item = get_current_item();
     $coins = new COinS($item);
     echo $coins->getCoinsSpan();
 }
 
-function COinSMultiple($items)
+function COinSMultiple()
 {
-    foreach ($items as $item) {
-        COinS($item);
+    while (loop_items()) {
+        COinS();
     }
 }
 
@@ -140,7 +141,7 @@ class COinS
     private function _setIdentifier()
     {
         // Set the identifier as the absolute URL of the current page.
-        // @todo Put this, or something like this, in a abs_url_for() helper 
+        // @todo Put this, or something like this, in a abs_uri() helper 
         // function.
         $serverProtocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 
                                             0, 
@@ -172,9 +173,7 @@ class COinS
     
     private function _getElementText($elementName)
     {
-        $elementTexts = item($elementName, 
-                             array('element_set' => self::ELEMENT_SET_DUBLIN_CORE));
-        return $elementTexts[count($elementTexts) - 1];
+        return item(self::ELEMENT_SET_DUBLIN_CORE, $elementName);
     }
     
     private function _buildCoinsSpan()
