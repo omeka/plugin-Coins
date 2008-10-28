@@ -1,22 +1,39 @@
 <?php
-add_plugin_hook('append_to_item_show', 'COinS');
-add_plugin_hook('append_to_items_browse', 'COinSMultiple');
 
-function COinS()
+define('COINS_VERSION', '0.2');
+
+add_plugin_hook('install', 'coins_install');
+add_plugin_hook('uninstall', 'coins_uninstall');
+add_plugin_hook('public_append_to_items_show', 'coins');
+add_plugin_hook('admin_append_to_items_show_primary', 'coins');
+add_plugin_hook('public_append_to_items_browse_each', 'coins');
+add_plugin_hook('admin_append_to_items_browse_primary', 'coins_multiple');
+
+function coins_install()
 {
-    $item = get_current_item();
-    $coins = new COinS($item);
-    echo $coins->getCoinsSpan();
+	set_option('coins_version', COINS_VERSION);
 }
 
-function COinSMultiple()
+function coins_uninstall()
 {
-    while (loop_items()) {
-        COinS();
-    }
+	delete_option('coins_version');
 }
 
-class COinS
+function coins()
+{
+	$item = get_current_item();
+	$coins = new Coins($item);
+	echo $coins->getCoinsSpan();
+}
+ 
+function coins_multiple()
+{
+	while(loop_items()) {
+		coins();
+	}
+}
+ 
+class Coins
 {
     const COINS_SPAN_CLASS = 'Z3988';
     
