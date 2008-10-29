@@ -1,5 +1,4 @@
 <?php
-
 define('COINS_PLUGIN_VERSION', '0.2');
 
 add_plugin_hook('install', 'coins_install');
@@ -21,14 +20,13 @@ function coins_uninstall()
 
 function coins()
 {
-	$item = get_current_item();
-	$coins = new Coins($item);
+	$coins = new Coins;
 	echo $coins->getCoinsSpan();
 }
  
 function coins_multiple()
 {
-	while(loop_items()) {
+	while (loop_items()) {
 		coins();
 	}
 }
@@ -36,21 +34,13 @@ function coins_multiple()
 class Coins
 {
     const COINS_SPAN_CLASS = 'Z3988';
-    
     const CTX_VER = 'Z39.88-2004';
-    
     const RFT_VAL_FMT = 'info:ofi/fmt:kev:mtx:dc';
-    
     const RFR_ID = 'info:sid/omeka.org:generator';
-    
     const ELEMENT_SET_DUBLIN_CORE = 'Dublin Core';
-    
-    const ELEMENT_TEXT_INDEX = 0;
-    
-    private $_item;
+    const ELEMENT_DESCRIPTION_TRUNCATE_LENGTH = 500;
     
     private $_coins = array();
-    
     private $_coinsSpan;
     
     public function getCoinsSpan()
@@ -58,10 +48,8 @@ class Coins
         return $this->_coinsSpan;
     }
     
-    public function __construct($item)
+    public function __construct()
     {
-        $this->_item = $item;
-        
         $this->_coins['ctx_ver']     = self::CTX_VER;
         $this->_coins['rft_val_fmt'] = self::RFT_VAL_FMT;
         $this->_coins['rfr_id']      = self::RFR_ID;
@@ -98,8 +86,12 @@ class Coins
     }
     private function _setDescription()
     {
-        // Truncate long descriptions.
-        $this->_coins['rft.description'] = substr($this->_getElementText('Description'), 0, 500);
+        // Truncate long descriptions when needed.
+        $description = $this->_getElementText('Description');
+        if (self::ELEMENT_DESCRIPTION_TRUNCATE_LENGTH <= strlen($description)) {
+            $description = substr($description, 0, self::ELEMENT_DESCRIPTION_TRUNCATE_LENGTH);
+        }
+        $this->_coins['rft.description'] = $description;
     }
     private function _setPublisher()
     {
@@ -119,7 +111,7 @@ class Coins
      */
     private function _setType()
     {
-        switch ($this->_item->Type->name) {
+        switch (item('Item Type Name')) {
             case 'Oral History':
                 $type = 'interview';
                 break;
@@ -190,7 +182,15 @@ class Coins
     
     private function _getElementText($elementName)
     {
-        return item(self::ELEMENT_SET_DUBLIN_CORE, $elementName);
+        $elementText = item(self::ELEMENT_SET_DUBLIN_CORE, 
+                            $elementName, 
+                            array('no_filter' => true));
+        // item() returns false if no element text exists, so return null 
+        // instead.
+        if (false === $elementText) {
+            return null;
+        }
+        return $elementText;
     }
     
     private function _buildCoinsSpan()
