@@ -33,85 +33,119 @@ function coins_multiple()
  
 class Coins
 {
+    // Required COinS values.
     const COINS_SPAN_CLASS = 'Z3988';
-    const CTX_VER = 'Z39.88-2004';
-    const RFT_VAL_FMT = 'info:ofi/fmt:kev:mtx:dc';
-    const RFR_ID = 'info:sid/omeka.org:generator';
+    const CTX_VER          = 'Z39.88-2004';
+    const RFT_VAL_FMT      = 'info:ofi/fmt:kev:mtx:dc';
+    const RFR_ID           = 'info:sid/omeka.org:generator';
+    
+    // The name of the Dublin Core element set.
     const ELEMENT_SET_DUBLIN_CORE = 'Dublin Core';
+    
+    // The default title element text, in case the element text is empty or 
+    // does not exist.
+    const ELEMENT_TITLE_DEFAULT = '[unknown title]';
+    
+    // The lenth to truncate long descriptions.
     const ELEMENT_DESCRIPTION_TRUNCATE_LENGTH = 500;
     
-    private $_coins = array();
-    private $_coinsSpan;
+    // Array containing Dublin Core elements that do not need special 
+    // processing.
+    private $_elements = array('creator', 'subject', 'publisher', 
+                               'contributor', 'date', 'format', 'source', 
+                               'language', 'coverage', 'rights', 'relation');
     
+    // Array containing the COinS elements.
+    private $_coins = array();
+    
+    // The fully formatted COinS span.
+    private $_coinsSpan;
+        
+    /**
+     * Gather metadata and build the COinS span for the current item.
+     */
+    public function __construct()
+    {
+        // Set required COinS values.
+        $this->_coins['ctx_ver']     = self::CTX_VER;
+        $this->_coins['rft_val_fmt'] = self::RFT_VAL_FMT;
+        $this->_coins['rfr_id']      = self::RFR_ID;
+                
+        // Set the Dublin Core elements.
+        $this->_setElements();
+        
+        // Set the Dublin Core elements that need special processing.
+        $this->_setTitle();
+        $this->_setDescription();
+        $this->_setType();
+        $this->_setIdentifier();
+        
+        // Build the COinS span.
+        $this->_buildCoinsSpan();
+    }
+    
+    /**
+     * Get the COinS span.
+     */
     public function getCoinsSpan()
     {
         return $this->_coinsSpan;
     }
     
-    public function __construct()
+    /**
+     * Set the Dublin Core elements.
+     */
+    private function _setElements()
     {
-        $this->_coins['ctx_ver']     = self::CTX_VER;
-        $this->_coins['rft_val_fmt'] = self::RFT_VAL_FMT;
-        $this->_coins['rfr_id']      = self::RFR_ID;
-        
-        $this->_setTitle();
-        $this->_setCreator();
-        $this->_setSubject();
-        $this->_setDescription();
-        $this->_setPublisher();
-        $this->_setContributor();
-        $this->_setDate();
-        $this->_setType();
-        $this->_setFormat();
-        $this->_setIdentifier();
-        $this->_setSource();
-        $this->_setLanguage();
-        $this->_setCoverage();
-        $this->_setRights();
-        $this->_setRelation();
-        
-        $this->_buildCoinsSpan();
+        foreach ($this->_elements as $element) {
+            $elementText = $this->_getElementText(ucfirst($element));
+            // item() returns false if no element text exists. Do not set a 
+            // nonexistant element text to the _coins array.
+            if (false === $elementText) {
+                continue;
+            }
+            $this->_coins["rft.$element"] = $elementText;
+        }
     }
+    
+    /**
+     * Set the Dublin Core Title element.
+     */
     private function _setTitle()
     {
-        $this->_coins['rft.title'] = $this->_getElementText('Title');
+        $title = $this->_getElementText('Title');
+        if (false === $title || '' == trim($title)) {
+            $title = self::ELEMENT_TITLE_DEFAULT;
+        }
+        $this->_coins['rft.title'] = $title;
     }
-    private function _setCreator()
-    {
-        $this->_coins['rft.creator'] = $this->_getElementText('Creator');
-    }
-    private function _setSubject()
-    {
-        $this->_coins['rft.subject'] = $this->_getElementText('Subject');
-    }
+    
+    /**
+     * Set the Dublin Core Description element.
+     */
     private function _setDescription()
     {
-        // Truncate long descriptions when needed.
         $description = $this->_getElementText('Description');
+        if (false === $description) {
+            return;
+        }
+        // Truncate long descriptions when needed.
         if (self::ELEMENT_DESCRIPTION_TRUNCATE_LENGTH <= strlen($description)) {
-            $description = substr($description, 0, self::ELEMENT_DESCRIPTION_TRUNCATE_LENGTH);
+            $description = substr($description, 
+                                  0, 
+                                  self::ELEMENT_DESCRIPTION_TRUNCATE_LENGTH);
         }
         $this->_coins['rft.description'] = $description;
     }
-    private function _setPublisher()
-    {
-        $this->_coins['rft.publisher'] = $this->_getElementText('Publisher');
-    }
-    private function _setContributor()
-    {
-        $this->_coins['rft.contributor'] = $this->_getElementText('Contributor');
-    }
-    private function _setDate()
-    {
-        $this->_coins['rft.date'] = $this->_getElementText('Date');
-    }
+    
     /**
-     * Use the type from the Item Type name, not the Dublin Core type name.
+     * Set the Type. Use the type from the item type name, not the Dublin Core 
+     * type name.
      * @todo: devise a better mapping scheme between Omeka and COinS/Zotero
      */
     private function _setType()
     {
-        switch (item('Item Type Name')) {
+        switch (item('item type name')) {
             case 'Oral History':
                 $type = 'interview';
                 break;
@@ -140,61 +174,38 @@ class Coins
         }
         $this->_coins['rft.type'] = $type;
     }
-    private function _setFormat()
-    {
-        $this->_coins['rft.format'] = $this->_getElementText('Format');
-    }
+    
     /**
      * Use the current script URI instead of the Dublin Core identifier.
      */
     private function _setIdentifier()
     {
         // Set the identifier as the absolute URL of the current page.
-        // @todo Put this, or something like this, in a abs_uri() helper 
-        // function.
-        $serverProtocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 
-                                            0, 
-                                            strpos($_SERVER['SERVER_PROTOCOL'], '/')));
-        $serverName = $_SERVER['SERVER_NAME'];
-        $identifier = "$serverProtocol://$serverName" . uri();
-        $this->_coins['rft.identifier'] = $identifier;
-    }
-    private function _setSource()
-    {
-        $this->_coins['rft.source'] = $this->_getElementText('Source');
-    }
-    private function _setLanguage()
-    {
-        $this->_coins['rft.language'] = $this->_getElementText('Language');
-    }
-    private function _setCoverage()
-    {
-        $this->_coins['rft.coverage'] = $this->_getElementText('Coverage');
-    }
-    private function _setRights()
-    {
-        $this->_coins['rft.rights'] = $this->_getElementText('Rights');
-    }
-    private function _setRelation()
-    {
-        $this->_coins['rft.relation'] = $this->_getElementText('Relation');
+        $this->_coins['rft.identifier'] = abs_uri();
     }
     
+    /**
+     * Get the unfiltered element text.
+     */
     private function _getElementText($elementName)
     {
         $elementText = item(self::ELEMENT_SET_DUBLIN_CORE, 
                             $elementName, 
                             array('no_filter' => true));
-        // item() returns false if no element text exists, so return null 
-        // instead.
-        if (false === $elementText) {
-            return null;
-        }
         return $elementText;
     }
     
+    /**
+     * Build the COinS span and URL-encode the _coins array.
+     */
     private function _buildCoinsSpan()
     {
-        $this->_coinsSpan = '<span class="' . self::COINS_SPAN_CLASS . '" title="' . http_build_query($this->_coins, '', '&amp;') . '"></span>';
+        $coinsSpan = '<span class="';
+        $coinsSpan .= self::COINS_SPAN_CLASS;
+        $coinsSpan .= '" title="';
+        $coinsSpan .= http_build_query($this->_coins, '', '&amp;');
+        $coinsSpan .= '"></span>';
+        
+        $this->_coinsSpan = $coinsSpan;
     }
 }
