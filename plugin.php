@@ -1,5 +1,5 @@
 <?php
-define('COINS_PLUGIN_VERSION', '0.2');
+define('COINS_PLUGIN_VERSION', get_plugin_ini('Coins', 'version'));
 
 add_plugin_hook('install', 'coins_install');
 add_plugin_hook('uninstall', 'coins_uninstall');
