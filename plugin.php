@@ -1,5 +1,4 @@
 <?php
-define('COINS_PLUGIN_VERSION', get_plugin_ini('Coins', 'version'));
 
 add_plugin_hook('install', 'coins_install');
 add_plugin_hook('uninstall', 'coins_uninstall');
@@ -10,12 +9,10 @@ add_plugin_hook('admin_append_to_items_browse_primary', 'coins_multiple');
 
 function coins_install()
 {
-	set_option('coins_plugin_version', COINS_PLUGIN_VERSION);
 }
 
 function coins_uninstall()
 {
-	delete_option('coins_plugin_version');
 }
 
 function coins()
