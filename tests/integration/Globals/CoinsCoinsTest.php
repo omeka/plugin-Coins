@@ -12,10 +12,11 @@ class Globals_CoinsCoinsTest extends Coins_Test_AppTestCase
        $titleText = 'Wow';  
        $item = $this->_addItem($titleText);    
        $this->assertTrue($item->exists());    
-        
+
+       $_SERVER['HTTP_HOST'] = 'localhost';
+       
        $this->dispatch('/items/show/1');
-    
-       $_SERVER['HTTP_HOST'] = 'localhost';           
+              
        $identifierUrl = 'http://localhost/items/show/1';
        
        $coinsSpanExpected = '<span class="Z3988" title="ctx_ver=Z39.88-2004&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adc&amp;rfr_id=info%3Asid%2Fomeka.org%3Agenerator&amp;rft.title=' . urlencode($titleText) . '&amp;rft.type=document&amp;rft.identifier=' . urlencode($identifierUrl) . '"></span>';
