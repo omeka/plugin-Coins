@@ -6,8 +6,6 @@
  * @package Omeka
  */
 
-require_once 'Coins_Test_AppTestCase.php';
-
 /**
  * Test suite for Coins.
  *
@@ -20,7 +18,7 @@ class Coins_AllTests extends PHPUnit_Framework_TestSuite
     {
         $suite = new Coins_AllTests('Coins Tests');
         $testCollector = new PHPUnit_Runner_IncludePathTestCollector(
-          array(dirname(__FILE__) . '/integration')
+          array(dirname(__FILE__) . '/cases')
         );
         $suite->addTestFiles($testCollector->collectTests());
         return $suite;
