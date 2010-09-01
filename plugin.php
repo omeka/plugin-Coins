@@ -10,20 +10,10 @@
 // Coins class uses some theme helper functions, so need to include this.
 require_once HELPERS;
 
-add_plugin_hook('install', 'coins_install');
-add_plugin_hook('uninstall', 'coins_uninstall');
 add_plugin_hook('public_append_to_items_show', 'coins');
 add_plugin_hook('admin_append_to_items_show_primary', 'coins');
 add_plugin_hook('public_append_to_items_browse_each', 'coins');
 add_plugin_hook('admin_append_to_items_browse_primary', 'coins_multiple');
-
-function coins_install()
-{
-}
-
-function coins_uninstall()
-{
-}
 
 function coins()
 {
