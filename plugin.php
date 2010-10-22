@@ -13,7 +13,8 @@ require_once HELPERS;
 add_plugin_hook('public_append_to_items_show', 'coins');
 add_plugin_hook('admin_append_to_items_show_primary', 'coins');
 add_plugin_hook('public_append_to_items_browse_each', 'coins');
-add_plugin_hook('admin_append_to_items_browse_primary', 'coins_multiple');
+add_plugin_hook('admin_append_to_items_browse_simple_each', 'coins');
+add_plugin_hook('admin_append_to_items_browse_detailed_each', 'coins');
 
 function coins()
 {
