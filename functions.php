@@ -173,7 +173,8 @@ class Coins
     {
         $elementText = item(self::ELEMENT_SET_DUBLIN_CORE, 
                             $elementName, 
-                            array('no_filter' => true));
+                            array('no_filter' => true,
+                                  'no_escape' => true));
         return $elementText;
     }
     
@@ -185,7 +186,7 @@ class Coins
         $coinsSpan = '<span class="';
         $coinsSpan .= self::COINS_SPAN_CLASS;
         $coinsSpan .= '" title="';
-        $coinsSpan .= http_build_query($this->_coins, '', '&amp;');
+        $coinsSpan .= html_escape(http_build_query($this->_coins));
         $coinsSpan .= '"></span>';
         
         $this->_coinsSpan = $coinsSpan;
