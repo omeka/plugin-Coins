@@ -7,6 +7,8 @@
 
 class CoinsTest extends Omeka_Test_AppTestCase
 {
+    protected $_isAdminTest = false;
+
     public function setUp()
     {
         parent::setUp();
