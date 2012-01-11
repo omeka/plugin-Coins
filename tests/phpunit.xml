@@ -1,7 +1,7 @@
 <phpunit bootstrap="../../../application/tests/bootstrap.php"
          convertErrorsToExceptions="true"
          convertWarningsToExceptions="true">
-    <testsuite name="Coins Tests">
-        <file>AllTests.php</file>
+    <testsuite name="Coins">
+        <directory>cases</directory>
     </testsuite>
 </phpunit>
