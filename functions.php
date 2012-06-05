@@ -171,10 +171,10 @@ class Coins
      */
     private function _getElementText($elementName)
     {
-        $elementText = item(self::ELEMENT_SET_DUBLIN_CORE, 
-                            $elementName, 
-                            array('no_filter' => true,
-                                  'no_escape' => true));
+        $elementText = item(
+            array(self::ELEMENT_SET_DUBLIN_CORE, $elementName), 
+            array('no_filter' => true, 'no_escape' => true)
+            );
         return $elementText;
     }
     
