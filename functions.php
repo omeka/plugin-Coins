@@ -127,7 +127,7 @@ class Coins
      */
     private function _setType()
     {
-        switch (item('item type name')) {
+        switch (metadata('item', 'item type name')) {
             case 'Oral History':
                 $type = 'interview';
                 break;
@@ -171,7 +171,8 @@ class Coins
      */
     private function _getElementText($elementName)
     {
-        $elementText = item(
+        $elementText = metadata(
+            'item',
             array(self::ELEMENT_SET_DUBLIN_CORE, $elementName), 
             array('no_filter' => true, 'no_escape' => true)
             );
