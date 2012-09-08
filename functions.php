@@ -8,7 +8,7 @@ function coins()
  
 function coins_multiple()
 {
-	while (loop_items()) {
+	foreach (loop('items') as $item) {
 		coins();
 	}
 }
