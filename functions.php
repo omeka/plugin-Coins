@@ -163,7 +163,7 @@ class Coins
     private function _setIdentifier()
     {
         // Set the identifier as the absolute URL of the current page.
-        $this->_coins['rft.identifier'] = abs_uri();
+        $this->_coins['rft.identifier'] = absolute_url();
     }
     
     /**
