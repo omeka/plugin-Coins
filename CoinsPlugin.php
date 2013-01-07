@@ -27,7 +27,11 @@ class CoinsPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookInitialize()
     {
         // Add the view helper directory to the stack.
-        get_view()->addHelperPath(dirname(__FILE__) . '/views/helpers', 'Coins_View_Helper_');
+        try {
+            get_view()->addHelperPath(dirname(__FILE__) . '/views/helpers', 'Coins_View_Helper_');
+        } catch (Zend_Exception $e) {
+            // view not loaded, do nothing
+        }
     }
     
     /**
