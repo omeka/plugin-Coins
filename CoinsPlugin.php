@@ -14,25 +14,11 @@
 class CoinsPlugin extends Omeka_Plugin_AbstractPlugin
 {
     protected $_hooks = array(
-        'initialize',
         'public_items_show',
         'admin_items_show',
         'public_items_browse',
         'admin_items_browse',
     );
-    
-    /**
-     * Initialize the plugin.
-     */
-    public function hookInitialize()
-    {
-        // Add the view helper directory to the stack.
-        try {
-            get_view()->addHelperPath(dirname(__FILE__) . '/views/helpers', 'Coins_View_Helper_');
-        } catch (Zend_Exception $e) {
-            // view not loaded, do nothing
-        }
-    }
     
     /**
      * Print out the COinS span on the public items show page.
