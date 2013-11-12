@@ -54,6 +54,7 @@ class Coins_View_Helper_Coins extends Zend_View_Helper_Abstract
             if (false === $elementText) {
                 continue;
             }
+            $elementName = lcfirst($elementName);
             $coins["rft.$elementName"] = $elementText;
         }
         
