@@ -110,8 +110,8 @@ class Coins_View_Helper_Coins extends Zend_View_Helper_Abstract
             $coins['rft.type'] = $type;
         }
 
-        // Set the identifier key as the absolute URL of the current page.
-        $coins['rft.identifier'] = absolute_url();
+        // Set the identifier key as the absolute URL to the item
+        $coins['rft.identifier'] = record_url($item, null, true);
 
         // Build and return the COinS span tag.
         $coinsSpan = '<span class="Z3988" title="';
